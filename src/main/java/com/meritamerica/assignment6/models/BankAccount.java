@@ -15,7 +15,7 @@ import javax.validation.constraints.Min;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
 
-//Directions hinted at using @MappedSuperClass, however, using @Entity/@inheritance allows each sublass to be a table
+//Directions hinted at using @MappedSuperClass, however, using @Entity/@inheritance allows each subclass to be a table
 @Entity(name = "BankAccount")
 @Inheritance(strategy = InheritanceType.TABLE_PER_CLASS)
 public abstract class BankAccount {

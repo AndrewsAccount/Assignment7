@@ -6,6 +6,7 @@ import java.util.Optional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import com.meritamerica.assignment6.exceptions.AccountNotFoundException;
 import com.meritamerica.assignment6.models.CheckingAccount;
 import com.meritamerica.assignment6.repositories.CheckingAccountRepository;
 
@@ -24,8 +25,10 @@ public class CheckingService {
 	}
 
 	// find by one account by id service
-	public CheckingAccount findCheckingById(int id) {
-		
+	public CheckingAccount findCheckingById(int id) throws AccountNotFoundException {
+		if(!(repository.existsById(id))) {
+			throw new AccountNotFoundException("Account not found");
+		}	
 		return repository.findById(id).orElse(null);
 	}
 

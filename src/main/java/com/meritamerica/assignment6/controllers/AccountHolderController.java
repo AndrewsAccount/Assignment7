@@ -15,6 +15,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.meritamerica.assignment6.exceptions.AccountNotFoundException;
 import com.meritamerica.assignment6.exceptions.ExceedsCombinedBalanceLimitException;
 import com.meritamerica.assignment6.exceptions.NegativeBalanceException;
 import com.meritamerica.assignment6.models.AccountHolder;
@@ -71,7 +72,7 @@ public class AccountHolderController {
 	// find an account holder by id
 	@ResponseStatus(HttpStatus.OK)
 	@GetMapping(value = "AccountHolders/{id}")
-	public AccountHolder findById(@PathVariable int id) {
+	public AccountHolder findById(@PathVariable int id) throws AccountNotFoundException {
 		return accountHolderService.findById(id);
 	}
 
@@ -87,7 +88,7 @@ public class AccountHolderController {
 	// find contact details
 	@ResponseStatus(HttpStatus.OK)
 	@GetMapping(value = "AccountHolders/{id}/Details")
-	public Object getDetails(int id) {
+	public Object getDetails(int id) throws AccountNotFoundException {
 		return detailsService.findById(id);
 	}
 
@@ -95,7 +96,7 @@ public class AccountHolderController {
 	@ResponseStatus(HttpStatus.CREATED)
 	@PostMapping(value = "/AccountHolders/{id}/CheckingAccount")
 	public CheckingAccount addCheckingAccount(@PathVariable int id, @RequestBody CheckingAccount account)
-			throws NegativeBalanceException, ExceedsCombinedBalanceLimitException {
+			throws NegativeBalanceException, ExceedsCombinedBalanceLimitException, AccountNotFoundException {
 		
 		// balance must not be negative & an account holders combined balances may not exceed 250_000
 		if (account.getBalance() < 0) {
@@ -119,7 +120,7 @@ public class AccountHolderController {
 	@ResponseStatus(HttpStatus.CREATED)
 	@PostMapping(value = "/AccountHolders/{id}/SavingsAccount")
 	public SavingsAccount addSavingsAccount(@PathVariable int id, @RequestBody SavingsAccount account)
-			throws NegativeBalanceException, ExceedsCombinedBalanceLimitException {
+			throws NegativeBalanceException, ExceedsCombinedBalanceLimitException, AccountNotFoundException {
 		
 		// balance must not be negative & an account holders combined balances may not exceed 250_000
 		if (account.getBalance() < 0) {
@@ -134,7 +135,7 @@ public class AccountHolderController {
 	// find savings account by id
 	@ResponseStatus(HttpStatus.OK)
 	@GetMapping(value = "AccountHolders/{id}/SavingsAccount")
-	public Object findSavingsById(@PathVariable int id) {
+	public Object findSavingsById(@PathVariable int id) throws AccountNotFoundException {
 		return savingsService.findSavingsById(id);
 	}
 
@@ -154,7 +155,7 @@ public class AccountHolderController {
 	//find cd account by id
 	@ResponseStatus(HttpStatus.OK)
 	@GetMapping(value = "AccountHolders/{id}/CDAccount")
-	public Object getCDAccountById(@PathVariable int id) {
+	public Object getCDAccountById(@PathVariable int id) throws AccountNotFoundException {
 		return cdAccountService.findById(id);
 	}
 

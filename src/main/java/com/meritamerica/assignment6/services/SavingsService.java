@@ -6,6 +6,7 @@ import java.util.Optional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import com.meritamerica.assignment6.exceptions.AccountNotFoundException;
 import com.meritamerica.assignment6.models.SavingsAccount;
 import com.meritamerica.assignment6.repositories.SavingsAccountRepository;
 
@@ -24,7 +25,10 @@ public class SavingsService {
 	}
 
 	// find by one account by id service
-	public SavingsAccount findSavingsById(int id) {
+	public SavingsAccount findSavingsById(int id) throws AccountNotFoundException {
+		if(!(repository.existsById(id))) {
+			throw new AccountNotFoundException("Account not found");
+		}
 		return repository.findById(id).orElse(null);
 	}
 

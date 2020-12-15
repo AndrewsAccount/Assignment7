@@ -6,6 +6,7 @@ import java.util.Optional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import com.meritamerica.assignment6.exceptions.AccountNotFoundException;
 import com.meritamerica.assignment6.models.CDAccount;
 import com.meritamerica.assignment6.repositories.CDAccountRepository;
 
@@ -25,7 +26,10 @@ public class CDAccountService {
 	}
 
 	// find by one account by id service
-	public CDAccount findById(int id) {
+	public CDAccount findById(int id) throws AccountNotFoundException {
+		if(!(repository.existsById(id))) {
+			throw new AccountNotFoundException("Account not found");
+		}
 		return repository.findById(id).orElse(null);
 	}
 

@@ -11,9 +11,8 @@ import com.meritamerica.assignment6.exceptions.AccountNotFoundException;
 import com.meritamerica.assignment6.models.AccountHolder;
 import com.meritamerica.assignment6.repositories.AccountHolderRepository;
 
-//**This class is specifically for the tasks of adding/searching the databases**
-
-@Service
+// Part of Design Pattern, this class is specifically for the tasks of adding/searching the databases
+@Service 
 public class AccountHolderService {
 
 	@Autowired // creates variables for this instance
@@ -26,7 +25,10 @@ public class AccountHolderService {
 	}
 
 	// find by one account by id service
-	public AccountHolder findById(int id) {
+	public AccountHolder findById(int id) throws AccountNotFoundException {
+		if(!(repository.existsById(id))) {
+			throw new AccountNotFoundException("Account not found");
+		}
 		return repository.findById(id).orElse(null);
 	}
 
