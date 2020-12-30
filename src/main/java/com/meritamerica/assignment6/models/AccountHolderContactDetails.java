@@ -9,6 +9,8 @@ import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.OneToOne;
 import javax.persistence.Table;
+import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.NotNull;
 
 @Entity
 @Table(name = "Contact_Details")
@@ -19,15 +21,19 @@ public class AccountHolderContactDetails {
 	@GeneratedValue(strategy = GenerationType.AUTO)
 	@Column(name = "id")
 	Integer id;
+	@NotBlank   // @notblank/@notnull to ensure required fields
+	@NotNull 
 	String email;
+	@NotBlank
+	@NotNull
 	Integer phoneNumber;
 	
 	// each set of Details is related to 1 one Account Holder and each Account Holder has only 1 set of Details
 	@OneToOne(cascade = CascadeType.ALL)
-	@JoinColumn(name = "accountHolder_id", referencedColumnName = "accountHolder_id") 
+	@JoinColumn(name = "accountHolder_id", referencedColumnName = "accountHolder_id") // join by foreign key
 	AccountHolder accountHolder;
 	
-	public AccountHolderContactDetails() {	
+	public AccountHolderContactDetails() {	// all persistent classes in must have default constructor for Hibernate to instantiate
 	}
 
 	//--- Getters/Setters
@@ -65,11 +71,5 @@ public class AccountHolderContactDetails {
 	public AccountHolderContactDetails setAccountHolder(AccountHolder accountHolder) {
 		this.accountHolder = accountHolder;
 		return this;
-	}
-	
-
-	
-
-	
-	
+	}	
 }

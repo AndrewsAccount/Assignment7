@@ -10,7 +10,7 @@ import com.meritamerica.assignment6.exceptions.AccountNotFoundException;
 import com.meritamerica.assignment6.models.AccountHolderContactDetails;
 import com.meritamerica.assignment6.repositories.DetailsRepository;
 
-//**This class is specifically for the tasks of adding/searching the databases**
+//**This class is specifically for the tasks of adding/searching the database holding account holder details**
 
 @Service
 public class DetailsService {

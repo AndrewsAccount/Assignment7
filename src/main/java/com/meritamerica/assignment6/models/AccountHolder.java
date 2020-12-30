@@ -10,7 +10,6 @@ import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
-import javax.persistence.JoinColumn;
 import javax.persistence.OneToMany;
 import javax.persistence.OneToOne;
 import javax.persistence.Table;
@@ -18,23 +17,35 @@ import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
 
 import com.fasterxml.jackson.annotation.JsonManagedReference;
+import com.fasterxml.jackson.annotation.JsonPropertyOrder;
+
+//** This class has lists of accounts of each type and basic information on each account holder
 
 @Entity
-@Table
+@Table				// sets the order in which the fields of account holder object are returned in Json
+@JsonPropertyOrder({"id", "firstName", "middleName", "lastName", "ssn", 
+					"checkingAccounts", "savingsAccounts", "cdAccounts",
+					"numberOfCheckingAccounts", "combinedCheckingBalance", 
+					"numberOfSavingsAccounts", "combinedSavingsBalance", 
+					"numberOfCdAccounts", "combinedCDBalance", 
+					"getTotalCombinedBalances"})
 public class AccountHolder {
 
-	public AccountHolder() {
-		
+	public AccountHolder() { // all persistent classes in must have default constructor for Hibernate to instantiate
 	}
 	
 	// Required details for each Account
 	
-	@NotNull(message = "First Name can not be null")
+	@Id //This will be the id used to reference each specific account holder
+	@GeneratedValue(strategy = GenerationType.AUTO)  // Auto-generation of the ids
+	@Column(name = "accountHolder_id") // this column is used to link to each of the account types for each account holder
+	Integer id;
+	
+	@NotNull(message = "First Name can not be null")     // @notblank/@notnull to ensure required fields 
 	@NotBlank(message = "First Name can not be blank")
 	String firstName;
 	
-	@NotNull(message = "Middle Name can not be null")
-	@NotBlank(message = "Middle Name can not be blank")
+	// middle name not necessary
 	String middleName;
 	
 	@NotNull(message = "Last Name can not be null")
@@ -45,119 +56,89 @@ public class AccountHolder {
 	@NotBlank(message = "Social Security Number can not be blank")
 	String ssn;
 	
-	@Id
-	@GeneratedValue(strategy = GenerationType.AUTO)
-	@Column(name = "accountHolder_id")
-	Integer id;
+		
+	//----- table relationships and array lists ----
 	
+	// this maps each account holder to each of the following types of accounts
+	// (will also help keep track of combined balances)
+	// CascadeType.ALL - any change that happens to this(accountHolder) entity, must update the associated account types as well
 	
-	
-	//----- table relationships and array lists will also help keep track of combined balances`
-	
-	// each accountHolder has 1 set of Details & Each set of Details belongs to only 1 AccountHolder
+	// each accountHolder has 1 set of Details & each set of Details belongs to only 1 AccountHolder (one-to-one)
 	@OneToOne(cascade = CascadeType.ALL, mappedBy = "accountHolder", fetch = FetchType.LAZY)
 	private AccountHolderContactDetails contactDetails;
 
-	// an AccountHolder may have numerous CheckingAccounts, but each CheckingAccount can only have 1 AccountHolder
+	// an AccountHolder may have numerous CheckingAccounts, but each list of CheckingAccounts can only have 1 AccountHolder (one-to-many)
 	@OneToMany(cascade = CascadeType.ALL, mappedBy = "accountHolder", fetch = FetchType.LAZY)
 	private List<CheckingAccount> checkingAccounts;
 	
-	// an AccountHolder may have numerous SavingsAccounts, but each SavingsAccount can only have 1 AccountHolder
+	// an AccountHolder may have numerous SavingsAccounts, but each list of SavingsAccounts can only have 1 AccountHolder (one-to-many)
 	@OneToMany(cascade = CascadeType.ALL, mappedBy = "accountHolder", fetch = FetchType.LAZY)
 	private List<SavingsAccount> savingsAccounts;
 	
-	// an AccountHolder may have numerous CDAccounts, but each particular CDAccount can only have 1 AccountHolder
+	// an AccountHolder may have numerous CDAccounts, but each list of CDAccounts can only have 1 AccountHolder (one-to-many)
 	@OneToMany(cascade = CascadeType.ALL, mappedBy = "accountHolder", fetch = FetchType.LAZY)
 	private List<CDAccount> cdAccounts;
 
 	
 	
-	//------Getters/Setters for variables -------
+	//---Getters--- ** this is the information that will be returned upon requests**
 	
 	public String getFirstName() {
 		return firstName;
 	}
-
-	public AccountHolder setFirstName(String firstName) {
-		this.firstName = firstName;
-		return this;
-	}
-
 	public String getMiddleName() {
 		return middleName;
 	}
-
-	public AccountHolder setMiddleName(String middleName) {
-		this.middleName = middleName;
-		return this;
-	}
-
 	public String getLastName() {
 		return lastName;
 	}
-
-	public AccountHolder setLastName(String lastName) {
-		this.lastName = lastName;
-		return this;
-	}
-
 	public String getSsn() {
 		return ssn;
-	}
-
-	public AccountHolder setSsn(String ssn) {
-		this.ssn = ssn;
-		return this;
+	}	
+	public Integer getId() {
+			return id;
 	}
 	
-	
-	
-	//---- Methods for getting contents of entire tables/lists  -----
+	// ---get/set account lists---
 	
 	@JsonManagedReference   // used to get out of endless recursion 
 	public List<CheckingAccount> getCheckingAccounts() {
 		return checkingAccounts;
 	}
-
 	public void setCheckingAccounts(List<CheckingAccount> checkingAccounts) {
 		this.checkingAccounts = new ArrayList<CheckingAccount>(checkingAccounts);
 	}
-
 	@JsonManagedReference
 	public List<SavingsAccount> getSavingsAccounts() {
 		return savingsAccounts;
 	}
-
 	public void setSavingsAccounts(List<SavingsAccount> savingsAccounts) {
 		this.savingsAccounts = new ArrayList<SavingsAccount>(savingsAccounts);
-	}
-	
+	}	
 	@JsonManagedReference
-	public List<CDAccount> getcDAccounts() {
+	public List<CDAccount> getcdAccounts() {
 		return cdAccounts;
 	}
-
-	public void setcDAccounts(List<CDAccount> cDAccounts) {
-		this.cdAccounts = new ArrayList<CDAccount>(cDAccounts);
+	public void setcdAccounts(List<CDAccount> cdAccounts) {
+		this.cdAccounts = new ArrayList<CDAccount>(cdAccounts);
+	}	
+	
+		
+	//---- get combined balances & number of accounts---
+	
+	// get number of checking
+	public int getNumberOfCheckingAccounts() {
+		int total = 0;
+		if (checkingAccounts != null) {
+			for(CheckingAccount checkAcct : checkingAccounts) {
+				total++;
+			}
+			return total;
+		}
+		return total;
 	}
 	
-	
-	
-	// -- get/set id
-	
-	public Integer getId() {
-		return id;
-	}
-
-	public AccountHolder setId(Integer id) {
-		this.id = id;
-		return this;
-	}
-	
-	
-	
-	//---- get combined balances 
-	
+	// get combined checking
 	public double getCombinedCheckingBalance() {
 		double combinedCheckingBalance = 0;
 		if (checkingAccounts != null) {
@@ -169,6 +150,19 @@ public class AccountHolder {
 		return 0;
 	}
 	
+	// get number of savings 
+	public int getNumberOfSavingsAccounts() {
+		int total = 0;
+		if (savingsAccounts != null) {
+			for(SavingsAccount saveAcct : savingsAccounts) {
+				total++;
+			}
+			return total;
+		}
+		return total;
+	}
+	
+	// combined savings
 	public double getCombinedSavingsBalance() {
 		double combinedSavingsBalance = 0;
 		if (savingsAccounts != null) {
@@ -180,6 +174,19 @@ public class AccountHolder {
 		return 0;
 	}
 	
+	// number of cd accounts
+	public int getNumberOfCdAccounts() {
+		int total = 0;
+		if (cdAccounts != null) {
+			for(CDAccount cdAcct : cdAccounts) {
+				total++;
+			}
+			return total;
+		}
+		return total;
+	}
+	
+	// combined cd balance
 	public double getCombinedCDBalance() {
 		double combinedCDBalance = 0;
 		if (cdAccounts != null) {
@@ -191,8 +198,8 @@ public class AccountHolder {
 		return 0;
 	}
 	
-	public double getCombinedBalances() {
+	// total of all balances
+	public double getTotalCombinedBalances() {
 		return getCombinedSavingsBalance() + getCombinedCheckingBalance() + getCombinedCDBalance();
 	}
-	
 }

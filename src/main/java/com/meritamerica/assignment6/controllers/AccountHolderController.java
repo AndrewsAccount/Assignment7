@@ -1,8 +1,6 @@
 package com.meritamerica.assignment6.controllers;
 
-import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 
 import javax.validation.Valid;
 
@@ -23,140 +21,135 @@ import com.meritamerica.assignment6.models.AccountHolderContactDetails;
 import com.meritamerica.assignment6.models.CDAccount;
 import com.meritamerica.assignment6.models.CheckingAccount;
 import com.meritamerica.assignment6.models.SavingsAccount;
-import com.meritamerica.assignment6.repositories.AccountHolderRepository;
 import com.meritamerica.assignment6.services.AccountHolderService;
 import com.meritamerica.assignment6.services.CDAccountService;
 import com.meritamerica.assignment6.services.CheckingService;
 import com.meritamerica.assignment6.services.DetailsService;
 import com.meritamerica.assignment6.services.SavingsService;
 
-//** MAIN CONTROLLER FOR ALL ACCOUNTS**\\
+// MAIN CONTROLLER for - Account Holders, Contact Details & Account types: Checking, Savings, CD  
+// calls services of holder, details, & each account types to control CRUD methods
 @RestController
 public class AccountHolderController {
 
-	// services controlled here
-	@Autowired // autowire imports the constructors from each service
-	AccountHolderService accountHolderService;
-	@Autowired
-	CDAccountService cdAccountService;
-	@Autowired
-	CheckingService checkingService;
+	// **constructors for services controlled **
+	@Autowired  						  // finds anything needed to be injected in this constructor and injects them for you
+	AccountHolderService holderService;  
 	@Autowired
 	DetailsService detailsService;
 	@Autowired
+	CheckingService checkingService;
+	@Autowired
 	SavingsService savingsService;
+	@Autowired
+	CDAccountService cdAccountService;
 
-	// ---CRUD methods----
+	
+	// --- CRUD METHODS ---
 
-	/*
-	 * How to know which account holder is being referred to in each
-	 * saving/checking/cd account calls In Services, how to getById: Optional<> or
-	 * .orElse()??
-	 * 
-	 */
-	// add account holder
+	//--find an account holder by id
+	@ResponseStatus(HttpStatus.OK)
+	@GetMapping(value = "AccountHolders/{id}")
+	public AccountHolder findById(@PathVariable Integer id) throws AccountNotFoundException {
+		return holderService.findById(id);
+	}
+	
+	//--add account holder
 	@ResponseStatus(HttpStatus.CREATED)
 	@PostMapping(value = "/AccountHolders")
 	public AccountHolder addAccountHolder(@Valid @RequestBody AccountHolder account) {
-		accountHolderService.addAccountHolder(account);
+		holderService.addAccountHolder(account);
 		return account;
 	}
 
-	// find all account holders
+	//--find all account holders
 	@ResponseStatus(HttpStatus.OK)
 	@GetMapping(value = "/AccountHolders")
 	public List<AccountHolder> findAllAccountHolders() {
-		return accountHolderService.findAllAccountHolders();
+		return holderService.findAllAccountHolders();
 	}
-
-	// find an account holder by id
-	@ResponseStatus(HttpStatus.OK)
-	@GetMapping(value = "AccountHolders/{id}")
-	public AccountHolder findById(@PathVariable int id) throws AccountNotFoundException {
-		return accountHolderService.findById(id);
-	}
-
 	
-	// add contact details
+	//--add contact details
 	@ResponseStatus(HttpStatus.CREATED)
 	@PostMapping(value = "/AccountHolders/{id}/Details")
-	public AccountHolderContactDetails addDetails(@PathVariable int id,
+	public AccountHolderContactDetails addDetails(@PathVariable Integer id,
 			@RequestBody AccountHolderContactDetails details) {
 		return detailsService.addDetails(details);
 	}
 
-	// find contact details
+	//--find contact details
 	@ResponseStatus(HttpStatus.OK)
 	@GetMapping(value = "AccountHolders/{id}/Details")
-	public Object getDetails(int id) throws AccountNotFoundException {
+	public Object getDetails(Integer id) throws AccountNotFoundException {
 		return detailsService.findById(id);
 	}
-
-	// add checking account
+	
+	//--add checking account
 	@ResponseStatus(HttpStatus.CREATED)
-	@PostMapping(value = "/AccountHolders/{id}/CheckingAccount")
-	public CheckingAccount addCheckingAccount(@PathVariable int id, @RequestBody CheckingAccount account)
+	@PostMapping(value = "/AccountHolders/{id}/CheckingAccounts")
+	public CheckingAccount addCheckingAccount( @RequestBody CheckingAccount account, @PathVariable Integer id)
 			throws NegativeBalanceException, ExceedsCombinedBalanceLimitException, AccountNotFoundException {
+		
+		//--balance must not be negative & an account holders combined balances may not exceed 250_000
+		if (account.getBalance() < 0) {
+			throw new NegativeBalanceException("Cannot have negative balance");
+		}
+		if (account.getBalance() + ((AccountHolder) findById(id)).getTotalCombinedBalances() > 250000) {
+			throw new ExceedsCombinedBalanceLimitException("Balance exceeds limit");
+		}
+		return checkingService.addCheckingAccount(account, id);
+	}
+
+	//--show list of holder's checking accounts using the holder's id
+	@ResponseStatus(HttpStatus.OK)
+	@GetMapping(value = "AccountHolders/{id}/CheckingAccounts")
+	public List<CheckingAccount> findCheckingById(@PathVariable Integer id) throws AccountNotFoundException {
+		return checkingService.findAccounts(id);
+	}
+
+	//--add savings account
+	@ResponseStatus(HttpStatus.CREATED)
+	@PostMapping(value = "/AccountHolders/{id}/SavingsAccounts")
+	public SavingsAccount addSavingsAccount(@PathVariable Integer id, @RequestBody SavingsAccount account)
+			throws NegativeBalanceException, ExceedsCombinedBalanceLimitException, AccountNotFoundException {		
+	
+		//--balance must not be negative & an account holders combined balances may not exceed 250_000
+		if (account.getBalance() < 0) {
+			throw new NegativeBalanceException("Cannot have negative balance");
+		}
+		if (account.getBalance() + ((AccountHolder) findById(id)).getTotalCombinedBalances() > 250000) {
+			throw new ExceedsCombinedBalanceLimitException("Balance exceeds limit");
+		}
+		return savingsService.addSavingsAccount(account, id);
+	}
+
+	//--find savings account by id
+	@ResponseStatus(HttpStatus.OK)
+	@GetMapping(value = "AccountHolders/{id}/SavingsAccounts")
+	public List<SavingsAccount> findSavingsById(@PathVariable Integer id) throws AccountNotFoundException {
+		return savingsService.findAccounts(id);
+	}
+
+	//--add cd account to holder's list of cd accounts
+	@PostMapping(value = "/AccountHolders/{id}/CDAccounts")
+	@ResponseStatus(HttpStatus.CREATED)
+	public CDAccount addCDAccount(@PathVariable Integer id, @RequestBody CDAccount account) 
+			throws NegativeBalanceException, ExceedsCombinedBalanceLimitException, AccountNotFoundException {		
 		
 		// balance must not be negative & an account holders combined balances may not exceed 250_000
 		if (account.getBalance() < 0) {
 			throw new NegativeBalanceException("Cannot have negative balance");
 		}
-		if (account.getBalance() + ((AccountHolder) findById(id)).getCombinedBalances() > 250000) {
+		if (account.getBalance() + ((AccountHolder) findById(id)).getTotalCombinedBalances() > 250000) {
 			throw new ExceedsCombinedBalanceLimitException("Balance exceeds limit");
 		}
-		return checkingService.addCheckingAccount(account);
+		return cdAccountService.addAccount(account, id);
 	}
 
-	// find checking by id
+	//--show list of cd accounts for holder
 	@ResponseStatus(HttpStatus.OK)
-	@GetMapping(value = "AccountHolders/{id}/CheckingAccount")
-	public CheckingAccount findCheckingById(@PathVariable int id) {
-		// return checkingAccountService.findById(accountHolderService.findById(id));
-		return null;
+	@GetMapping(value = "AccountHolders/{id}/CDAccounts")
+	public List<CDAccount> getCDAccounts(@PathVariable Integer id) throws AccountNotFoundException {
+		return cdAccountService.findAccounts(id);
 	}
-
-	// add savings account
-	@ResponseStatus(HttpStatus.CREATED)
-	@PostMapping(value = "/AccountHolders/{id}/SavingsAccount")
-	public SavingsAccount addSavingsAccount(@PathVariable int id, @RequestBody SavingsAccount account)
-			throws NegativeBalanceException, ExceedsCombinedBalanceLimitException, AccountNotFoundException {
-		
-		// balance must not be negative & an account holders combined balances may not exceed 250_000
-		if (account.getBalance() < 0) {
-			throw new NegativeBalanceException("Cannot have negative balance");
-		}
-		if (account.getBalance() + ((AccountHolder) findById(id)).getCombinedBalances() > 250000) {
-			throw new ExceedsCombinedBalanceLimitException("Balance exceeds limit");
-		}
-		return savingsService.addSavingsAccount(account);
-	}
-
-	// find savings account by id
-	@ResponseStatus(HttpStatus.OK)
-	@GetMapping(value = "AccountHolders/{id}/SavingsAccount")
-	public Object findSavingsById(@PathVariable int id) throws AccountNotFoundException {
-		return savingsService.findSavingsById(id);
-	}
-
-	// add cd account
-	@PostMapping(value = "/AccountHolders/{id}/CDAccount")
-	@ResponseStatus(HttpStatus.CREATED)
-	public Object addCDAccount(@PathVariable int id, @RequestBody CDAccount account)
-			throws NegativeBalanceException {
-		
-		// balance may not be negative
-		if (account.getBalance() < 0) {
-			throw new NegativeBalanceException("Cannot have negative balance");
-		}
-		return cdAccountService.addCDAccount(account);
-	}
-
-	//find cd account by id
-	@ResponseStatus(HttpStatus.OK)
-	@GetMapping(value = "AccountHolders/{id}/CDAccount")
-	public Object getCDAccountById(@PathVariable int id) throws AccountNotFoundException {
-		return cdAccountService.findById(id);
-	}
-
 }
