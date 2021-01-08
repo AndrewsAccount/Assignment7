@@ -23,14 +23,11 @@ public class CDAccount extends BankAccount	 {   //inherits balance, dateOpened &
 	private Integer id;
 	
 	//interest rate must be a positive number less than 1
-	@NotBlank(message = "Interest Rate cannot be blank")
-	@NotNull(message = "Interest Rate cannot be null")
 	@DecimalMin(value = "0.0", inclusive = false, message = "interest rate must be greater than zero")
 	@DecimalMax(value = "1.0", inclusive = false, message = "interest rate must be less than one")
 	double interestRate;
 	
-	@NotBlank(message = "Term cannot be blank")
-	@NotNull(message = "Term cannot be null")
+	@NotNull // validation for int
 	int term;
 	
 	// map instance of CDOffering to list of holder's cd accounts

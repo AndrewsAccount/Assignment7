@@ -72,7 +72,7 @@ public class AccountHolderController {
 	//--add contact details
 	@ResponseStatus(HttpStatus.CREATED)
 	@PostMapping(value = "/AccountHolders/{id}/Details")
-	public AccountHolderContactDetails addDetails(@PathVariable Integer id,
+	public AccountHolderContactDetails addDetails(@Valid @PathVariable Integer id,
 			@RequestBody AccountHolderContactDetails details) {
 		return detailsService.addDetails(details);
 	}
@@ -87,7 +87,7 @@ public class AccountHolderController {
 	//--add checking account
 	@ResponseStatus(HttpStatus.CREATED)
 	@PostMapping(value = "/AccountHolders/{id}/CheckingAccounts")
-	public CheckingAccount addCheckingAccount( @RequestBody CheckingAccount account, @PathVariable Integer id)
+	public CheckingAccount addCheckingAccount(@Valid @RequestBody CheckingAccount account, @PathVariable Integer id)
 			throws NegativeBalanceException, ExceedsCombinedBalanceLimitException, AccountNotFoundException {
 		
 		//--balance must not be negative & an account holders combined balances may not exceed 250_000
@@ -110,7 +110,7 @@ public class AccountHolderController {
 	//--add savings account
 	@ResponseStatus(HttpStatus.CREATED)
 	@PostMapping(value = "/AccountHolders/{id}/SavingsAccounts")
-	public SavingsAccount addSavingsAccount(@PathVariable Integer id, @RequestBody SavingsAccount account)
+	public SavingsAccount addSavingsAccount(@Valid @PathVariable Integer id, @RequestBody SavingsAccount account)
 			throws NegativeBalanceException, ExceedsCombinedBalanceLimitException, AccountNotFoundException {		
 	
 		//--balance must not be negative & an account holders combined balances may not exceed 250_000
@@ -133,7 +133,7 @@ public class AccountHolderController {
 	//--add cd account to holder's list of cd accounts
 	@PostMapping(value = "/AccountHolders/{id}/CDAccounts")
 	@ResponseStatus(HttpStatus.CREATED)
-	public CDAccount addCDAccount(@PathVariable Integer id, @RequestBody CDAccount account) 
+	public CDAccount addCDAccount(@Valid @PathVariable Integer id, @RequestBody CDAccount account) 
 			throws NegativeBalanceException, ExceedsCombinedBalanceLimitException, AccountNotFoundException {		
 		
 		// balance must not be negative & an account holders combined balances may not exceed 250_000
