@@ -4,6 +4,8 @@ import java.util.List;
 
 import javax.validation.Valid;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -15,6 +17,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.meritamerica.assignment6.exceptions.AccountNotFoundException;
 import com.meritamerica.assignment6.exceptions.ExceedsCombinedBalanceLimitException;
+import com.meritamerica.assignment6.exceptions.InterestRateOutOfBoundsException;
 import com.meritamerica.assignment6.exceptions.NegativeBalanceException;
 import com.meritamerica.assignment6.models.AccountHolder;
 import com.meritamerica.assignment6.models.AccountHolderContactDetails;
@@ -31,6 +34,8 @@ import com.meritamerica.assignment6.services.SavingsService;
 // calls services of holder, details, & each account types to control CRUD methods
 @RestController
 public class AccountHolderController {
+	Logger logger = LoggerFactory.getLogger(AccountHolderController.class);
+
 
 	// **constructors for services controlled **
 	@Autowired  						  // finds anything needed to be injected in this constructor and injects them for you
@@ -134,7 +139,7 @@ public class AccountHolderController {
 	@PostMapping(value = "/AccountHolders/{id}/CDAccounts")
 	@ResponseStatus(HttpStatus.CREATED)
 	public CDAccount addCDAccount(@Valid @PathVariable Integer id, @RequestBody CDAccount account) 
-			throws NegativeBalanceException, ExceedsCombinedBalanceLimitException, AccountNotFoundException {		
+			throws NegativeBalanceException, ExceedsCombinedBalanceLimitException, AccountNotFoundException, InterestRateOutOfBoundsException {		
 		
 		// balance must not be negative & an account holders combined balances may not exceed 250_000
 		if (account.getBalance() < 0) {
@@ -142,6 +147,9 @@ public class AccountHolderController {
 		}
 		if (account.getBalance() + ((AccountHolder) findById(id)).getTotalCombinedBalances() > 250000) {
 			throw new ExceedsCombinedBalanceLimitException("Balance exceeds limit");
+		}
+		if (account.getInterestRate() <= 0 || account.getInterestRate() >=1) {
+			throw new InterestRateOutOfBoundsException("Interest Rate must ;greater than zero & less than one");
 		}
 		return cdAccountService.addAccount(account, id);
 	}
