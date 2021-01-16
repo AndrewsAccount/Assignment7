@@ -8,6 +8,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -24,6 +27,8 @@ import com.meritamerica.assignment6.models.AccountHolderContactDetails;
 import com.meritamerica.assignment6.models.CDAccount;
 import com.meritamerica.assignment6.models.CheckingAccount;
 import com.meritamerica.assignment6.models.SavingsAccount;
+import com.meritamerica.assignment6.security.JwtUtil;
+import com.meritamerica.assignment6.security.models.SignupRequest;
 import com.meritamerica.assignment6.services.AccountHolderService;
 import com.meritamerica.assignment6.services.CDAccountService;
 import com.meritamerica.assignment6.services.CheckingService;
@@ -39,20 +44,21 @@ public class AccountHolderController {
 
 	// **constructors for services controlled **
 	@Autowired  						  // finds anything needed to be injected in this constructor and injects them for you
-	AccountHolderService holderService;  
+	private AccountHolderService holderService;  
 	@Autowired
-	DetailsService detailsService;
+	private DetailsService detailsService;
 	@Autowired
-	CheckingService checkingService;
+	private CheckingService checkingService;
 	@Autowired
-	SavingsService savingsService;
+	private SavingsService savingsService;
 	@Autowired
-	CDAccountService cdAccountService;
+	private CDAccountService cdAccountService;
 
 	
 	// --- CRUD METHODS ---
 
 	//--find an account holder by id
+	@PreAuthorize("hasAuthority('admin')")
 	@ResponseStatus(HttpStatus.OK)
 	@GetMapping(value = "AccountHolders/{id}")
 	public AccountHolder findById(@PathVariable Integer id) throws AccountNotFoundException {
@@ -60,6 +66,7 @@ public class AccountHolderController {
 	}
 	
 	//--add account holder
+	@PreAuthorize("hasAuthority('admin')")
 	@ResponseStatus(HttpStatus.CREATED)
 	@PostMapping(value = "/AccountHolders")
 	public AccountHolder addAccountHolder(@Valid @RequestBody AccountHolder account) {
@@ -68,6 +75,7 @@ public class AccountHolderController {
 	}
 
 	//--find all account holders
+	@PreAuthorize("hasAuthority('admin')")
 	@ResponseStatus(HttpStatus.OK)
 	@GetMapping(value = "/AccountHolders")
 	public List<AccountHolder> findAllAccountHolders() {
@@ -75,6 +83,7 @@ public class AccountHolderController {
 	}
 	
 	//--add contact details
+	@PreAuthorize("hasAuthority('admin')")
 	@ResponseStatus(HttpStatus.CREATED)
 	@PostMapping(value = "/AccountHolders/{id}/Details")
 	public AccountHolderContactDetails addDetails(@Valid @PathVariable Integer id,
@@ -83,6 +92,7 @@ public class AccountHolderController {
 	}
 
 	//--find contact details
+	@PreAuthorize("hasAuthority('admin')")
 	@ResponseStatus(HttpStatus.OK)
 	@GetMapping(value = "AccountHolders/{id}/Details")
 	public Object getDetails(Integer id) throws AccountNotFoundException {
@@ -90,6 +100,7 @@ public class AccountHolderController {
 	}
 	
 	//--add checking account
+	@PreAuthorize("hasAuthority('admin')")
 	@ResponseStatus(HttpStatus.CREATED)
 	@PostMapping(value = "/AccountHolders/{id}/CheckingAccounts")
 	public CheckingAccount addCheckingAccount(@Valid @RequestBody CheckingAccount account, @PathVariable Integer id)
@@ -106,13 +117,16 @@ public class AccountHolderController {
 	}
 
 	//--show list of holder's checking accounts using the holder's id
+	@PreAuthorize("hasAuthority('admin')")
 	@ResponseStatus(HttpStatus.OK)
 	@GetMapping(value = "AccountHolders/{id}/CheckingAccounts")
 	public List<CheckingAccount> findCheckingById(@PathVariable Integer id) throws AccountNotFoundException {
 		return checkingService.findAccounts(id);
 	}
 
+	
 	//--add savings account
+	@PreAuthorize("hasAuthority('admin')")
 	@ResponseStatus(HttpStatus.CREATED)
 	@PostMapping(value = "/AccountHolders/{id}/SavingsAccounts")
 	public SavingsAccount addSavingsAccount(@Valid @PathVariable Integer id, @RequestBody SavingsAccount account)
@@ -129,6 +143,7 @@ public class AccountHolderController {
 	}
 
 	//--find savings account by id
+	@PreAuthorize("hasAuthority('admin')")
 	@ResponseStatus(HttpStatus.OK)
 	@GetMapping(value = "AccountHolders/{id}/SavingsAccounts")
 	public List<SavingsAccount> findSavingsById(@PathVariable Integer id) throws AccountNotFoundException {
@@ -136,6 +151,7 @@ public class AccountHolderController {
 	}
 
 	//--add cd account to holder's list of cd accounts
+	@PreAuthorize("hasAuthority('admin')")
 	@PostMapping(value = "/AccountHolders/{id}/CDAccounts")
 	@ResponseStatus(HttpStatus.CREATED)
 	public CDAccount addCDAccount(@Valid @PathVariable Integer id, @RequestBody CDAccount account) 
@@ -155,6 +171,7 @@ public class AccountHolderController {
 	}
 
 	//--show list of cd accounts for holder
+	@PreAuthorize("hasAuthority('admin')")
 	@ResponseStatus(HttpStatus.OK)
 	@GetMapping(value = "AccountHolders/{id}/CDAccounts")
 	public List<CDAccount> getCDAccounts(@PathVariable Integer id) throws AccountNotFoundException {

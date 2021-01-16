@@ -10,6 +10,7 @@ import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.JoinColumn;
 import javax.persistence.OneToMany;
 import javax.persistence.OneToOne;
 import javax.persistence.Table;
@@ -18,11 +19,12 @@ import javax.validation.constraints.NotNull;
 
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
+import com.meritamerica.assignment6.security.models.User;
 
 //** This class has lists of accounts of each type and basic information on each account holder
 
 @Entity
-@Table				// sets the order in which the fields of account holder object are returned in Json
+@Table(name = "AccountHolder")				// sets the order in which the fields of account holder object are returned in Json
 @JsonPropertyOrder({"id", "firstName", "middleName", "lastName", "ssn", 
 					"checkingAccounts", "savingsAccounts", "cdAccounts",
 					"numberOfCheckingAccounts", "combinedCheckingBalance", 
@@ -30,9 +32,6 @@ import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 					"numberOfCdAccounts", "combinedCDBalance", 
 					"getTotalCombinedBalances"})
 public class AccountHolder {
-
-	public AccountHolder() { // all persistent classes in must have default constructor for Hibernate to instantiate
-	}
 	
 	// Required details for each Account
 	
@@ -64,7 +63,8 @@ public class AccountHolder {
 	// CascadeType.ALL - any change that happens to this(accountHolder) entity, must update the associated account types as well
 	
 	// each accountHolder has 1 set of Details & each set of Details belongs to only 1 AccountHolder (one-to-one)
-	@OneToOne(cascade = CascadeType.ALL, mappedBy = "accountHolder", fetch = FetchType.LAZY)
+	@OneToOne(cascade = CascadeType.ALL)
+	@JoinColumn(name = "account_holders_contact_Details_id", referencedColumnName = "account_holders_contact_details_id")
 	private AccountHolderContactDetails contactDetails;
 
 	// an AccountHolder may have numerous CheckingAccounts, but each list of CheckingAccounts can only have 1 AccountHolder (one-to-many)
@@ -79,7 +79,13 @@ public class AccountHolder {
 	@OneToMany(cascade = CascadeType.ALL, mappedBy = "accountHolder", fetch = FetchType.LAZY)
 	private List<CDAccount> cdAccounts;
 
+	@OneToOne(cascade = CascadeType.ALL)
+	@JoinColumn(name = "users_id")
+	private User user;
 	
+	
+	public AccountHolder() { // all persistent classes in must have default constructor for Hibernate to instantiate
+	}
 	
 	//---Getters--- ** this is the information that will be returned upon requests**
 	
@@ -121,7 +127,9 @@ public class AccountHolder {
 	}
 	public void setcdAccounts(List<CDAccount> cdAccounts) {
 		this.cdAccounts = new ArrayList<CDAccount>(cdAccounts);
-	}	
+	}
+	
+	
 	
 		
 	//---- get combined balances & number of accounts---

@@ -4,6 +4,8 @@ import java.util.List;
 
 import javax.validation.Valid;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -21,6 +23,7 @@ import com.meritamerica.assignment6.services.CDOfferingService;
 // cd offering is much different than a bank account or an account holder
 @RestController 
 public class CDOfferingController {
+	Logger log = LoggerFactory.getLogger(this.getClass());
 
 	// this is the only service this controller controls
 	@Autowired			// finds anything needed to be injected in this constructor and injects them for you

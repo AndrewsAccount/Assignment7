@@ -13,13 +13,13 @@ import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
 
 @Entity
-@Table(name = "Contact_Details")
+@Table(name = "AccountHolderContactDetails")
 public class AccountHolderContactDetails {
 
 	// contact details for each account holder
 	@Id
 	@GeneratedValue(strategy = GenerationType.AUTO)
-	@Column(name = "id")
+	@Column(name = "account_holders_contact_details_id")
 	Integer id;
 	@NotBlank   // @notblank/@notnull to ensure required fields
 	@NotNull 

@@ -1,4 +1,4 @@
-package com.meritamerica.assignment6.models;
+package com.meritamerica.assignment6.security.models;
 
 import java.util.Arrays;
 import java.util.Collection;
@@ -11,21 +11,26 @@ import org.springframework.security.core.userdetails.UserDetails;
 
 public class MyUserDetails implements UserDetails {
 	
+	private static final long serialVersionUID = 1L;
+	
 	private String userName;
 	private String password;
 	private boolean active;
-	private List<GrantedAuthority> authorities;  // list 
+	private Collection<? extends GrantedAuthority> authorities;  // list 
 
 	
 	// convert user instance we get 
 	public MyUserDetails(User user) {
-		this.userName = user.getUserName();
+		this.userName = user.getUsername();
 		this.password = user.getPassword();
 		this.active = user.isActive();
 		// need to convert list & map each into a different GrantedAthority object
-		this.authorities = Arrays.stream(user.getRoles().split(","))
-				.map(SimpleGrantedAuthority::new)
-				.collect(Collectors.toList());
+		this.authorities = user.getRoles().stream().map(
+				role -> new SimpleGrantedAuthority(role.getName().name())).collect(Collectors.toList());
+	}
+	
+	public MyUserDetails() {
+		
 	}
 
 	@Override

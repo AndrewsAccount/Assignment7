@@ -1,19 +1,24 @@
 package com.meritamerica.assignment6.security;
 
-import javax.persistence.CascadeType;
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.FetchType;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
-import javax.persistence.OneToOne;
-import javax.validation.constraints.NotEmpty;
-
-import com.fasterxml.jackson.annotation.JsonManagedReference;
-import com.meritamerica.assignment6.models.AccountHolder;
-
-//@Entity
+//import java.util.ArrayList;
+//import java.util.List;
+//
+//import javax.persistence.CascadeType;
+//import javax.persistence.Column;
+//import javax.persistence.Entity;
+//import javax.persistence.FetchType;
+//import javax.persistence.GeneratedValue;
+//import javax.persistence.GenerationType;
+//import javax.persistence.Id;
+//import javax.persistence.OneToOne;
+//import javax.validation.constraints.NotEmpty;
+//
+//import org.springframework.security.core.GrantedAuthority;
+//
+//import com.fasterxml.jackson.annotation.JsonManagedReference;
+//import com.meritamerica.assignment6.models.AccountHolder;
+//
+//@Entity  // This class is "backing 
 //public class Users {
 //	
 //	@Id
@@ -99,18 +104,18 @@ import com.meritamerica.assignment6.models.AccountHolder;
 //		this.authorities = authorities;
 //	}
 //	
-////	public List<GrantedAuthority> getAuthorityList() {
-////		if (this.authorities.length() > 0) {
-////			String[] arrStr = this.authorities.split(",");
-////			List<GrantedAuthority> authorityList = new ArrayList<>();
-////			for (String auth : arrStr) {
-////				authorityList.add(new Authority(auth));
-////			}
-////			return authorityList;
-////		}
-////		return new ArrayList<GrantedAuthority>();
-////	}
-////	
+//	public List<GrantedAuthority> getAuthorityList() {
+//		if (this.authorities.length() > 0) {
+//			String[] arrStr = this.authorities.split(",");
+//			List<GrantedAuthority> authorityList = new ArrayList<>();
+//			for (String auth : arrStr) {
+//				authorityList.add(new Authority(auth));
+//			}
+//			return authorityList;
+//		}
+//		return new ArrayList<GrantedAuthority>();
+//	}
+//	
 //	
 //
 //}
